@@ -4,6 +4,7 @@ const cors = require("cors");
 const userRouter = require('./users/users-router')
 const authRouter = require('./auth/auth-router')
 const session = require('express-session')
+const Store = require('connect-session-knex')(session)
 const knex = require('../data/db-config')
 
 /**
@@ -29,9 +30,17 @@ const sessionConfig = {
     maxAge: 1000 * 60,
     secure: false,
     httpOnly: true,
+    secure: false,
   },
   resave: false,
-  saveUninitialized:false,
+  saveUninitialized: false,
+  store: new Store({
+    knex,
+    createTable: true,
+    clearInterval: 1000 * 60 *10,
+    tablename: 'sessions',
+    sidfieldname: 'sid',
+  })
 }
 
 server.use(session(sessionConfig))
