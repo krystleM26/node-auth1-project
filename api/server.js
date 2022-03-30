@@ -53,8 +53,14 @@ server.use('/api/users', userRouter)
 server.use('/api/auth', authRouter)
 
 server.get("/", (req, res) => {
+  req.session.name = 'chocolatechip'
   res.json({ api: 'up' });
 });
+
+server.get('/greet', (req,res) => {
+  const name = req.session.name;
+  res.send(` Hello, ${req.session.name}`)
+})
 
 server.use((err, req, res, next) => { // eslint-disable-line
   res.status(err.status || 500).json({

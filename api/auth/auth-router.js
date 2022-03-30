@@ -3,6 +3,7 @@
 const router = require('express').Router()
 const bcrypt = require('bcryptjs')
 const Users = require('../users/users-model')
+const db = require('../../data/db-config')
 const {
   checkUsernameFree,
   checkUsernameExists,
@@ -11,20 +12,31 @@ const {
 
 router.post(
   '/register',
-  checkUsernameFree,
-  checkPasswordLength, 
-  async (req, res, next) => {
-    console.log(req.body)
-    try {
-      const hash = bcrypt.hashSync(req.user.password, 8)
-      const user = await Users.add({
-        username: req.user.username,
-        password: hash,
-      })
-      res.status(201).json('add new user ${user.username')
-    } catch (err) {
+  checkUsernameFree, 
+  (req, res, next) => {
+
+    const {username, password} = req.body;
+    const hash = bcrypt.hashSync(req.body.password, 8)
+    Users.add({username, password: hash})
+    .then(user => {
+      res.status(201).json(user)
+    })
+    .catch(err => {
       next({ message: err.message })
-    }
+    })
+    // try {
+    //   const hash = bcrypt.hashSync(req.body.password, 8)
+    //   const user = await Users.add({
+    //     username: req.body.username,
+    //     password: hash,
+    //   })
+    //   console.log(user)
+    //   res.status(201).json(`add new user ${user}`)
+    //   console.log('try')
+    // } catch (err) {
+    //   next({ message: err.message })
+    //   console.log('catch')
+    // }
   })
 
 
@@ -52,12 +64,12 @@ router.post(
  */
 
 router.post('/login', checkUsernameExists, (req, res, next) => {
-  if (bcrypt.compareSync(req.user.password, req.user.hash)) {
+  if (bcrypt.compareSync(req.body.password, req.body.hash)) {
     req.session.user = {
-      username: req.user.username,
-      password: req.user.hash,
+      username: req.body.username,
+      password: req.body.hash,
     }
-    res.status(200).json(` Welcome ${req.user.username}!`)
+    res.status(200).json(` Welcome ${req.body.username}!`)
   } else {
     next({ status: 401, message: 'Invalid Credentials' })
   }
