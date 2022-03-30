@@ -9,7 +9,7 @@
   }
 */
 function restricted(req, res, next) {
-  next({ status: 401, message: 'Your shall not pass!'})
+  next({ status: 401, message: 'You shall not pass!'})
 }
 
 /*
