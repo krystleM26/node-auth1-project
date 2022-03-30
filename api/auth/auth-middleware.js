@@ -9,7 +9,12 @@
   }
 */
 function restricted(req, res, next) {
-  next({ status: 401, message: 'You shall not pass!'})
+  if(req.session.user) {
+    next()
+  }else {
+    next({ status: 401, message: 'You shall not pass!'})
+
+  }
 }
 
 /*
@@ -36,8 +41,9 @@ if(req.body.username) {
     "message": "Invalid credentials"
   }
 */
-function checkUsernameExists(req, res, next) {
- if(!req.body.username) {
+async function checkUsernameExists(req, res, next) {
+  let [user] = await User.findby({username: req.user.username})
+ if(user == null) {
   next({ status: 401, message: 'Invalid Credentials'})
  } else {
    next()
